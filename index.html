@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" />
+    <meta name="renderer" content="webkit" />
+    <meta name="force-rendering" content="webkit" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mdui@1.0.2/dist/css/mdui.min.css">
+    <style>
+        .mdui-dialog {
+            height: initial !important;
+            overflow: scroll;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <button class="list-btn" v-on:click="syncMapData">列出文件</button>
+        <button class="create-btn">3</button>
+        <div>
+            <table class="mdui-table mdui-table-hoverable">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>地图名</th>
+                        <th>大小</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="(map,index)  in mapShow">
+                        <td>{{ index+1 }}</td>
+                        <td>{{ map.name }}</td>
+                        <td>{{ map.size }}</td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="mdui-dialog" id="maintab">
+                <div class="mdui-progress">
+                    <div class="mdui-progress-determinate" v-bind:style="{width: dialogPercent+'%'}"></div>
+                </div>
+                <div class="mdui-tab mdui-tab-full-width" id="example4-tab">
+                    <a href="#example4-tab1" class="mdui-ripple">选择csgo地图目录</a>
+                    <a href="#example4-tab2" class="mdui-ripple" v-bind:disabled="!(tabNow>=1)">选择文件前缀</a>
+                    <a href="#example4-tab3" class="mdui-ripple" v-bind:disabled="!(tabNow>=2)">选择数据源</a>
+                    <a href="#example4-tab4" class="mdui-ripple" v-bind:disabled="!(tabNow>=3)">确认执行</a>
+                </div>
+                <div id="example4-tab1" class="mdui-p-a-2">
+                    <p class="mdui-text-center">请点击下面按钮选择csgo地图目录并授权</p>
+                    <p class="mdui-text-center">例如:D:\SteamLibrary\steamapps\common\Counter-Strike Global
+                        Offensive\csgo\maps</p>
+                    <button class="mdui-btn mdui-btn-raised mdui-btn-block mdui-color-pink-accent mdui-rippl"
+                        v-on:click="selectDict">选择目录</button>
+                </div>
+                <div id="example4-tab2" class="mdui-p-a-2">
+                    <p>输入要清理的文件前缀,每行一个,默认不填为全部</p>
+                    <p>如: `ze` 你也可以使用 `!de` 来禁止某个前缀</p>
+                    <p>*ps:仅.bsp后缀的文件会被处理*</p>
+                    <div class="mdui-textfield mdui-textfield-floating-label">
+                        <label class="mdui-textfield-label">前缀</label>
+                        <textarea class="mdui-textfield-input" v-model="prefixStr"></textarea>
+                        <button class="mdui-btn mdui-btn-raised mdui-btn-block mdui-color-pink-accent mdui-rippl"
+                            v-on:click="setPrefixFilter">下一步</button>
+                    </div>
+                </div>
+                <div id="example4-tab3" class="mdui-p-a-2">
+                    <p>选择对比用的数据源,不选择则全部删除</p>
+                    <button class="mdui-btn mdui-btn-raised mdui-btn-block mdui-color-pink-accent mdui-rippl" v-on:click="selectSource">下一步</button>
+                </div>
+                <div id="example4-tab4" class="mdui-p-a-2">
+                    <p>准备已完成,请点击确定后检查清理条目,按右下角执行按钮清理</p>
+                    <button class="mdui-btn mdui-btn-raised mdui-btn-block mdui-color-pink-accent mdui-rippl" >确定</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/mdui@1.0.2/dist/js/mdui.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios@0.27.2/dist/axios.min.js"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/vue@2"></script> -->
+    <script>
+        var app = new Vue({
+            el: '#app',
+            data: {
+                localMaps: [],
+                directoryHandle: null,
+                mapProvider: [], // 可用地图来源
+                maps: {}, // 获取的地图
+                prefixFilter: [""], //要清除的地图前缀
+                tabNow: 0,
+                dialogIns: null,
+                tabIns: null,
+                dialogPercent: 25,
+                prefixStr: ""
+            },
+            mounted: function () {
+                this.dialogIns = new mdui.Dialog("#maintab", { modal: true, closeOnEsc: false, history: false });
+                this.tabIns = new mdui.Tab('#example4-tab');
+                this.dialogIns.open()
+                this.tabIns.handleUpdate();
+                // window.tabIns = this.tabIns
+            },
+            methods: {
+                selectDict: async function () {
+                    this.directoryHandle = await window.showDirectoryPicker();
+                    // await directoryHandle.queryPermission()
+                    this.localMaps = []
+                    for await (const entry of this.directoryHandle.values()) {
+                        if (entry.kind != "directory") {
+                            // console.log(entry)
+                            let file = await entry.getFile()
+                            // console.log(file)
+                            this.localMaps.push(file)
+                        }
+                    }
+                    this.tabNow=1
+                    this.dialogPercent=50
+                    this.$nextTick(function () {
+                        this.tabIns.next()
+                    })
+                },
+                selectSource:function(){
+                },
+                syncMapData: function () {
+                    let that = this
+                    axios.get('/maps.json')
+                        .then(function (response) {
+                            // console.log(response)
+                            j = response.data
+                            that.mapProvider = j["provider"]
+                            that.maps = j["maps"]
+                        })
+                        .catch(function (error) {
+                            console.log(error);
+                        });
+                },
+                setPrefixFilter: function () {
+                    this.prefixFilter = []
+                    let prefixs = this.prefixStr.split("\n")
+                    for (let prefix of prefixs) {
+                        console.log(prefix)
+                        this.prefixFilter.push(prefix.trim())
+                    }
+                    this.tabNow =2
+                    this.dialogPercent = 75
+                    this.$nextTick(function () {
+                        this.tabIns.next()
+                    })
+                },
+                tabChanged: function (ins, index, id) {
+                    console.log(ins, index, id)
+                }
+            },
+            computed: {
+                mapShow: function () {
+                    let ans = []
+                    for (let map of this.localMaps) {
+                        let f = false
+                        if (map.name.endsWith(".bsp")) {
+                            for (prefix of this.prefixFilter) {
+                                if (prefix.startsWith("!")) {
+                                    if (map.name.startsWith(prefix.slice(1))) {
+                                        f = false
+                                        return
+                                    }
+                                }
+                                if (map.name.startsWith(prefix)) {
+                                    f = true
+                                }
+                            }
+                        }
+                        if (f) {
+                            ans.push(map)
+                        }
+                    }
+                    return ans
+                }
+            }
+        })
+    </script>
+
+</body>
+
+</html>
