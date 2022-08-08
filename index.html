@@ -18,8 +18,6 @@
 
 <body>
     <div id="app">
-        <button class="list-btn" v-on:click="syncMapData">列出文件</button>
-        <button class="create-btn">3</button>
         <div>
             <table class="mdui-table mdui-table-hoverable">
                 <thead>
@@ -47,7 +45,7 @@
                     <a href="#example4-tab1" class="mdui-ripple">选择csgo地图目录</a>
                     <a href="#example4-tab2" class="mdui-ripple" v-bind:disabled="!(tabNow>=1)">选择文件前缀</a>
                     <a href="#example4-tab3" class="mdui-ripple" v-bind:disabled="!(tabNow>=2)">选择数据源</a>
-                    <a href="#example4-tab4" class="mdui-ripple" v-bind:disabled="!(tabNow>=3)">确认执行</a>
+                    <a href="#example4-tab4" class="mdui-ripple" v-bind:disabled="!(tabNow>=3)">配置确认</a>
                 </div>
                 <div id="example4-tab1" class="mdui-p-a-2">
                     <p class="mdui-text-center">请点击下面按钮选择csgo地图目录并授权</p>
@@ -68,12 +66,41 @@
                     </div>
                 </div>
                 <div id="example4-tab3" class="mdui-p-a-2">
-                    <p>选择对比用的数据源,不选择则全部删除</p>
-                    <button class="mdui-btn mdui-btn-raised mdui-btn-block mdui-color-pink-accent mdui-rippl" v-on:click="selectSource">下一步</button>
+                    <p class="mdui-text-center">选择对比用的数据源,不选择则全部删除</p>
+                    <div class="mdui-list" v-for="(conf,name) in maps">
+                        <label class="mdui-list-item mdui-ripple">
+                            <div class="mdui-list-item-avatar">
+                                <img :src="conf.icons" />
+                            </div>
+                            <div class="mdui-list-item-content">
+                                <div class="mdui-list-item-title">{{ name }}</div>
+                                <div class="mdui-list-item-text mdui-list-item-one-line">
+                                    <span class="mdui-text-color-theme-text">数据更新时间{{ (new
+                                        Date(conf.update*1000)).toLocaleString() }}</span>
+                                    <span class="mdui-text-color-theme-text">地图数:{{ conf.maps.length }}</span>
+                                </div>
+                            </div>
+                            <div class="mdui-checkbox">
+                                <input type="checkbox" :value="name" v-model="sourceSelected" />
+                                <i class="mdui-checkbox-icon"></i>
+                            </div>
+                        </label>
+                    </div>
+                    <button class="mdui-btn mdui-btn-raised mdui-btn-block mdui-color-pink-accent mdui-rippl"
+                        v-on:click="selectSource">下一步</button>
                 </div>
                 <div id="example4-tab4" class="mdui-p-a-2">
-                    <p>准备已完成,请点击确定后检查清理条目,按右下角执行按钮清理</p>
-                    <button class="mdui-btn mdui-btn-raised mdui-btn-block mdui-color-pink-accent mdui-rippl" >确定</button>
+                    <p>请检查下方配置，点击确定后检查将被清理的条目，确认无误点击右下方按钮清理</p>
+                    <p>选择的前缀: </p>
+                    <div class="mdui-chip" v-for="prefix in prefixFilter">
+                        <span class="mdui-chip-title">{{ prefix }}</span>
+                    </div>
+                    <p>选择的数据源: </p>
+                    <div class="mdui-chip" v-for="source in sourceSelected">
+                        <span class="mdui-chip-title">{{ source }}</span>
+                    </div>
+                    <button
+                        class="mdui-btn mdui-btn-raised mdui-btn-block mdui-color-pink-accent mdui-rippl" v-on:click="dialogIns.close()">确定</button>
                 </div>
             </div>
 
@@ -89,20 +116,21 @@
             data: {
                 localMaps: [],
                 directoryHandle: null,
-                mapProvider: [], // 可用地图来源
                 maps: {}, // 获取的地图
                 prefixFilter: [""], //要清除的地图前缀
                 tabNow: 0,
                 dialogIns: null,
                 tabIns: null,
                 dialogPercent: 25,
-                prefixStr: ""
+                prefixStr: "",
+                sourceSelected: []
             },
             mounted: function () {
                 this.dialogIns = new mdui.Dialog("#maintab", { modal: true, closeOnEsc: false, history: false });
                 this.tabIns = new mdui.Tab('#example4-tab');
                 this.dialogIns.open()
                 this.tabIns.handleUpdate();
+                this.syncMapData()
                 // window.tabIns = this.tabIns
             },
             methods: {
@@ -118,22 +146,25 @@
                             this.localMaps.push(file)
                         }
                     }
-                    this.tabNow=1
-                    this.dialogPercent=50
+                    this.tabNow = 1
+                    this.dialogPercent = 50
                     this.$nextTick(function () {
                         this.tabIns.next()
                     })
                 },
-                selectSource:function(){
+                selectSource: function () {
+                    this.tabNow = 3
+                    this.dialogPercent = 100
+                    this.$nextTick(function () {
+                        this.tabIns.next()
+                    })
                 },
                 syncMapData: function () {
                     let that = this
                     axios.get('/maps.json')
                         .then(function (response) {
                             // console.log(response)
-                            j = response.data
-                            that.mapProvider = j["provider"]
-                            that.maps = j["maps"]
+                            that.maps = response.data
                         })
                         .catch(function (error) {
                             console.log(error);
@@ -142,11 +173,17 @@
                 setPrefixFilter: function () {
                     this.prefixFilter = []
                     let prefixs = this.prefixStr.split("\n")
+                    let t=0
                     for (let prefix of prefixs) {
-                        console.log(prefix)
+                        if (prefix.startsWith("!")){
+                            t=t+1
+                        }
                         this.prefixFilter.push(prefix.trim())
                     }
-                    this.tabNow =2
+                    if (this.prefixFilter.length==t){ // 全是禁止命令则添加全部
+                        this.prefixFilter.push("")
+                    }
+                    this.tabNow = 2
                     this.dialogPercent = 75
                     this.$nextTick(function () {
                         this.tabIns.next()
@@ -159,6 +196,10 @@
             computed: {
                 mapShow: function () {
                     let ans = []
+                    let rtn=[]
+                    if (this.tabNow <= 1) {
+                        return ans
+                    }
                     for (let map of this.localMaps) {
                         let f = false
                         if (map.name.endsWith(".bsp")) {
@@ -166,7 +207,7 @@
                                 if (prefix.startsWith("!")) {
                                     if (map.name.startsWith(prefix.slice(1))) {
                                         f = false
-                                        return
+                                        break
                                     }
                                 }
                                 if (map.name.startsWith(prefix)) {
@@ -178,12 +219,30 @@
                             ans.push(map)
                         }
                     }
-                    return ans
+                    if (this.tabNow<=2){
+                        return ans
+                    }
+                    maps={}
+                    for (let source of this.sourceSelected){
+                        for (let map of this.maps[source]["maps"]){
+                            if (!map.name.endsWith(".bsp")){
+                                maps[map.name+".bsp"]=true
+                            }else{
+                                maps[map.name]=true
+                            }
+                        }
+                    }
+                    for (let map of ans){
+                        if (true==maps[map.name]){
+                            continue
+                        }else{
+                            rtn.push(map)
+                        }
+                    }
+                    return rtn
                 }
             }
         })
     </script>
-
 </body>
-
 </html>
