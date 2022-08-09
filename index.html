@@ -13,6 +13,10 @@
             height: initial !important;
             overflow: scroll;
         }
+
+        .mdui-textfield {
+            padding-top: 0px !important;
+        }
     </style>
 </head>
 
@@ -54,16 +58,19 @@
                     <button class="mdui-btn mdui-btn-raised mdui-btn-block mdui-color-pink-accent mdui-rippl"
                         v-on:click="selectDict">选择目录</button>
                 </div>
-                <div id="example4-tab2" class="mdui-p-a-2">
+                <div id="example4-tab2" class="mdui-p-l-2">
                     <p>输入要清理的文件前缀,每行一个,默认不填为全部</p>
                     <p>如: `ze` 你也可以使用 `!de` 来禁止某个前缀</p>
                     <p>*ps:仅.bsp后缀的文件会被处理*</p>
                     <div class="mdui-textfield mdui-textfield-floating-label">
                         <label class="mdui-textfield-label">前缀</label>
                         <textarea class="mdui-textfield-input" v-model="prefixStr"></textarea>
+                    </div>
+                    <div class="mdui-p-b-2">
                         <button class="mdui-btn mdui-btn-raised mdui-btn-block mdui-color-pink-accent mdui-rippl"
                             v-on:click="setPrefixFilter">下一步</button>
                     </div>
+
                 </div>
                 <div id="example4-tab3" class="mdui-p-a-2">
                     <p class="mdui-text-center">选择对比用的数据源,不选择则全部删除</p>
@@ -86,24 +93,38 @@
                             </div>
                         </label>
                     </div>
+
                     <button class="mdui-btn mdui-btn-raised mdui-btn-block mdui-color-pink-accent mdui-rippl"
                         v-on:click="selectSource">下一步</button>
+
                 </div>
-                <div id="example4-tab4" class="mdui-p-a-2">
-                    <p>请检查下方配置，点击确定后检查将被清理的条目，确认无误点击右下方按钮清理</p>
+                <div id="example4-tab4" class="mdui-p-x-2">
+                    <p>请检查下方配置，点击确定后可以查看详细条目，确认无误点击右下方按钮清理</p>
+                    <p>所有文件总数：{{ localMaps.length }}</p>
                     <p>选择的前缀: </p>
                     <div class="mdui-chip" v-for="prefix in prefixFilter">
                         <span class="mdui-chip-title">{{ prefix }}</span>
                     </div>
                     <p>选择的数据源: </p>
-                    <div class="mdui-chip" v-for="source in sourceSelected">
+                    <div class="mdui-chip mdui-p-b-2" v-for="source in sourceSelected">
                         <span class="mdui-chip-title">{{ source }}</span>
                     </div>
-                    <button
-                        class="mdui-btn mdui-btn-raised mdui-btn-block mdui-color-pink-accent mdui-rippl" v-on:click="dialogIns.close()">确定</button>
+                    <p>筛选后可以清理的文件数：{{ mapShow.length }}</p>
+                    <div class="mdui-p-y-2">
+                        <button class="mdui-btn mdui-btn-raised mdui-btn-block mdui-color-pink-accent mdui-rippl"
+                            v-on:click="dialogIns.close()">确定</button>
+                    </div>
                 </div>
             </div>
-
+        </div>
+        <div class="mdui-fab-wrapper" id="exampleFab">
+            <button class="mdui-fab mdui-fab-fixed mdui-color-theme-accent" style="margin-bottom: 70px"
+                v-on:click="openSetting">
+                <i class="mdui-icon material-icons">settings</i>
+            </button>
+            <button class="mdui-fab mdui-fab-fixed mdui-color-theme-accent" v-on:click="deleteBtn">
+                <i class="mdui-icon material-icons">delete_forever</i>
+            </button>
         </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/mdui@1.0.2/dist/js/mdui.min.js"></script>
@@ -134,6 +155,17 @@
                 // window.tabIns = this.tabIns
             },
             methods: {
+                openSetting: function () {
+                    console.log("openSetting")
+                    this.dialogIns.open()
+                },
+                finalDelete: function () {
+                    console.log("delete")
+                },
+                deleteBtn: function () {
+                    console.log("deleteBtn")
+                    mdui.alert("确认删除吗?", "最后确认", this.finalDelete)
+                },
                 selectDict: async function () {
                     this.directoryHandle = await window.showDirectoryPicker();
                     // await directoryHandle.queryPermission()
@@ -173,14 +205,14 @@
                 setPrefixFilter: function () {
                     this.prefixFilter = []
                     let prefixs = this.prefixStr.split("\n")
-                    let t=0
+                    let t = 0
                     for (let prefix of prefixs) {
-                        if (prefix.startsWith("!")){
-                            t=t+1
+                        if (prefix.startsWith("!")) {
+                            t = t + 1
                         }
                         this.prefixFilter.push(prefix.trim())
                     }
-                    if (this.prefixFilter.length==t){ // 全是禁止命令则添加全部
+                    if (this.prefixFilter.length == t) { // 全是禁止命令则添加全部
                         this.prefixFilter.push("")
                     }
                     this.tabNow = 2
@@ -196,7 +228,7 @@
             computed: {
                 mapShow: function () {
                     let ans = []
-                    let rtn=[]
+                    let rtn = []
                     if (this.tabNow <= 1) {
                         return ans
                     }
@@ -219,23 +251,23 @@
                             ans.push(map)
                         }
                     }
-                    if (this.tabNow<=2){
+                    if (this.tabNow <= 2) {
                         return ans
                     }
-                    maps={}
-                    for (let source of this.sourceSelected){
-                        for (let map of this.maps[source]["maps"]){
-                            if (!map.name.endsWith(".bsp")){
-                                maps[map.name+".bsp"]=true
-                            }else{
-                                maps[map.name]=true
+                    maps = {}
+                    for (let source of this.sourceSelected) {
+                        for (let map of this.maps[source]["maps"]) {
+                            if (!map.name.endsWith(".bsp")) {
+                                maps[map.name + ".bsp"] = true
+                            } else {
+                                maps[map.name] = true
                             }
                         }
                     }
-                    for (let map of ans){
-                        if (true==maps[map.name]){
+                    for (let map of ans) {
+                        if (true == maps[map.name]) {
                             continue
-                        }else{
+                        } else {
                             rtn.push(map)
                         }
                     }
@@ -245,4 +277,5 @@
         })
     </script>
 </body>
+
 </html>
