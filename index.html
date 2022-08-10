@@ -36,7 +36,7 @@
                     <tr v-for="(map,index)  in mapShow">
                         <td>{{ index+1 }}</td>
                         <td>{{ map.name }}</td>
-                        <td>{{ map.size }}</td>
+                        <td>{{ hSizeOf(map.size) }}</td>
                         <td></td>
                     </tr>
                 </tbody>
@@ -126,6 +126,17 @@
                 <i class="mdui-icon material-icons">delete_forever</i>
             </button>
         </div>
+        <div class="mdui-dialog" id="deleteDoneDialog">
+            <div class="mdui-p-x-3 mdui-p-b-2">
+                <h2>完成</h2>
+                <p>已删除全部{{ mapShow.length }}个文件,总共释放{{ hSizeOf(1) }}空间，感谢您的使用。</p>
+                <p>有任何问题可以联系作者，邮件 83506876@qq.com</p>
+                <img width="400" height="140" class="mdui-center"
+                    src="https://steamcard.vercel.app/card/76561199062253455/dark,badge,group">
+                <button class="mdui-m-t-2 mdui-btn mdui-btn-raised mdui-btn-block mdui-color-pink-accent mdui-rippl"
+                mdui-dialog-close>爽了</button>
+            </div>
+        </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/mdui@1.0.2/dist/js/mdui.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
@@ -161,10 +172,13 @@
                 },
                 finalDelete: function () {
                     console.log("delete")
+                    // TODO:进行文件删除
+                    var tab = new mdui.Dialog("#deleteDoneDialog", { history: false });
+                    tab.open()
                 },
                 deleteBtn: function () {
                     console.log("deleteBtn")
-                    mdui.alert("确认删除吗?", "最后确认", this.finalDelete)
+                    mdui.alert("确认删除吗?", "这是最后的确认", this.finalDelete)
                 },
                 selectDict: async function () {
                     this.directoryHandle = await window.showDirectoryPicker();
@@ -223,6 +237,18 @@
                 },
                 tabChanged: function (ins, index, id) {
                     console.log(ins, index, id)
+                },
+                hSizeOf: function (value) {
+                    if (null == value || value == '') {
+                        return "0 Bytes";
+                    }
+                    var unitArr = new Array("Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB");
+                    var index = 0;
+                    var srcsize = parseFloat(value);
+                    index = Math.floor(Math.log(srcsize) / Math.log(1024));
+                    var size = srcsize / Math.pow(1024, index);
+                    size = size.toFixed(2);//保留的小数位数
+                    return size + unitArr[index];
                 }
             },
             computed: {
@@ -258,14 +284,14 @@
                     for (let source of this.sourceSelected) {
                         for (let map of this.maps[source]["maps"]) {
                             if (!map.name.endsWith(".bsp")) {
-                                maps[map.name + ".bsp"] = true
+                                maps[map.name.toLowerCase() + ".bsp"] = true
                             } else {
-                                maps[map.name] = true
+                                maps[map.name.toLowerCase()] = true
                             }
                         }
                     }
                     for (let map of ans) {
-                        if (true == maps[map.name]) {
+                        if (true == maps[map.name.toLowerCase()]) {
                             continue
                         } else {
                             rtn.push(map)
