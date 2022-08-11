@@ -46,10 +46,18 @@
                     <div class="mdui-progress-determinate" v-bind:style="{width: dialogPercent+'%'}"></div>
                 </div>
                 <div class="mdui-tab mdui-tab-full-width" id="example4-tab">
+                    <a href="#example4-tab0" class="mdui-ripple">前述</a>
                     <a href="#example4-tab1" class="mdui-ripple">选择csgo地图目录</a>
                     <a href="#example4-tab2" class="mdui-ripple" v-bind:disabled="!(tabNow>=1)">选择文件前缀</a>
                     <a href="#example4-tab3" class="mdui-ripple" v-bind:disabled="!(tabNow>=2)">选择数据源</a>
                     <a href="#example4-tab4" class="mdui-ripple" v-bind:disabled="!(tabNow>=3)">配置确认</a>
+                </div>
+                <div id="example4-tab0" class="mdui-p-a-2">
+                    <p class="mdui-text-center">本网站的目的是清理社区服地图更新后遗留的旧地图</p>
+                    <p class="mdui-text-center">你可以开F12直接看到所有的代码,或者来<a href="https://github.com/9268/csgomapclean">github</a>给我提个bug</p>
+                    <p class="mdui-text-center">如果有其他数据源需要支持欢迎提pr</p>
+                    <button class="mdui-btn mdui-btn-raised mdui-btn-block mdui-color-pink-accent mdui-rippl"
+                        v-on:click="tabIns.next();dialogPercent=40">开始</button>
                 </div>
                 <div id="example4-tab1" class="mdui-p-a-2">
                     <p class="mdui-text-center">请点击下面按钮选择csgo地图目录并授权</p>
@@ -153,7 +161,7 @@
                 tabNow: 0,
                 dialogIns: null,
                 tabIns: null,
-                dialogPercent: 25,
+                dialogPercent: 20,
                 prefixStr: "",
                 sourceSelected: []
             },
@@ -193,7 +201,7 @@
                         }
                     }
                     this.tabNow = 1
-                    this.dialogPercent = 50
+                    this.dialogPercent = 60
                     this.$nextTick(function () {
                         this.tabIns.next()
                     })
@@ -230,7 +238,7 @@
                         this.prefixFilter.push("")
                     }
                     this.tabNow = 2
-                    this.dialogPercent = 75
+                    this.dialogPercent = 80
                     this.$nextTick(function () {
                         this.tabIns.next()
                     })
