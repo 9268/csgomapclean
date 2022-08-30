@@ -23,29 +23,34 @@
 <body>
     <div id="app">
         <div>
-            <table class="mdui-table mdui-table-hoverable">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>地图名</th>
-                        <th>大小</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="(map,index)  in mapShow">
-                        <td>{{ index+1 }}</td>
-                        <td>{{ map.name }}</td>
-                        <td>{{ hSizeOf(map.size) }}</td>
-                        <td></td>
-                    </tr>
-                </tbody>
-            </table>
+            <div class="mdui-container-fluid">
+                <div class="mdui-row" style="height: 90%; overflow: auto;">
+                    <table class="mdui-table mdui-table-hoverable">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>地图名</th>
+                                <th>大小</th>
+                                <th>忽略</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(map,index)  in mapShow">
+                                <td>{{ index+1 }}</td>
+                                <td>{{ map.name }}</td>
+                                <td>{{ hSizeOf(map.size) }}</td>
+                                <td><button class="mdui-btn mdui-btn-raised mdui-btn-block mdui-rippl"
+                                    v-on:click="prefixFilter.push('!'+map.name.substring(0, map.name.lastIndexOf('.')))">忽略</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
             <div class="mdui-dialog" id="maintab">
                 <div class="mdui-progress">
                     <div class="mdui-progress-determinate" v-bind:style="{width: dialogPercent+'%'}"></div>
                 </div>
-                <div class="mdui-tab mdui-tab-full-width" id="example4-tab">
+                <div class="mdui-tab mdui-tab-full-width" id="example4-tab" v-on:change.mdui.tab="tabChanged">
                     <a href="#example4-tab0" class="mdui-ripple">前述</a>
                     <a href="#example4-tab1" class="mdui-ripple">选择csgo地图目录</a>
                     <a href="#example4-tab2" class="mdui-ripple" v-bind:disabled="!(tabNow>=1)">选择文件前缀</a>
@@ -54,7 +59,8 @@
                 </div>
                 <div id="example4-tab0" class="mdui-p-a-2">
                     <p class="mdui-text-center">本网站的目的是清理社区服地图更新后遗留的旧地图</p>
-                    <p class="mdui-text-center">你可以开F12直接看到所有的代码,或者来<a href="https://github.com/9268/csgomapclean">github</a>给我提个bug</p>
+                    <p class="mdui-text-center">你可以开F12直接看到所有的代码,或者来<a
+                            href="https://github.com/9268/csgomapclean">github</a>给我提个bug</p>
                     <p class="mdui-text-center">如果有其他数据源需要支持欢迎提pr</p>
                     <button class="mdui-btn mdui-btn-raised mdui-btn-block mdui-color-pink-accent mdui-rippl"
                         v-on:click="tabIns.next();dialogPercent=40">开始</button>
@@ -63,6 +69,7 @@
                     <p class="mdui-text-center">请点击下面按钮选择csgo地图目录并授权</p>
                     <p class="mdui-text-center">例如:D:\SteamLibrary\steamapps\common\Counter-Strike Global
                         Offensive\csgo\maps</p>
+                    <p class="mdui-text-center">根据你硬盘的性能，可能需要几秒钟让浏览器弹出授权框</p>
                     <button class="mdui-btn mdui-btn-raised mdui-btn-block mdui-color-pink-accent mdui-rippl"
                         v-on:click="selectDict">选择目录</button>
                 </div>
@@ -142,7 +149,7 @@
                 <img width="400" height="140" class="mdui-center"
                     src="https://steamcard.vercel.app/card/76561199062253455/dark,badge,group">
                 <button class="mdui-m-t-2 mdui-btn mdui-btn-raised mdui-btn-block mdui-color-pink-accent mdui-rippl"
-                mdui-dialog-close>爽了</button>
+                    mdui-dialog-close>爽了</button>
             </div>
         </div>
     </div>
@@ -177,6 +184,7 @@
                 openSetting: function () {
                     console.log("openSetting")
                     this.dialogIns.open()
+                    this.dialogIns.handleUpdate()
                 },
                 finalDelete: function () {
                     console.log("delete")
@@ -244,7 +252,10 @@
                     })
                 },
                 tabChanged: function (ins, index, id) {
-                    console.log(ins, index, id)
+                    // console.log(ins, index, id)
+                    this.$nextTick(function () {
+                        this.dialogIns.handleUpdate()
+                    })
                 },
                 hSizeOf: function (value) {
                     if (null == value || value == '') {
