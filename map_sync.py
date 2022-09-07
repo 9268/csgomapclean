@@ -101,14 +101,14 @@ def parse_jsly(text):
     js = parse(text)['MapList']
     if js != None and 'csgo' in js.keys():
         try:
-            if isinstance(js['csgo'], OrderedDict):
-                j = js['csgo']
-                maps.append({'name': j['mapname'],
-                         'size': -1,  'verify': None,  'verifyer': ''})
-            else:
+            if isinstance(js['csgo'], list):
                 for j in js['csgo']:
                     maps.append({'name': j['mapname'],
                              'size': -1,  'verify': None,  'verifyer': ''})
+            else:
+                j = js['csgo']
+                maps.append({'name': j['mapname'],
+                         'size': -1,  'verify': None,  'verifyer': ''})
         except Exception as e:
             print(e)
             print(js)
