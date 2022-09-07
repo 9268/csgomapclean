@@ -10,7 +10,6 @@ import os
 LOG_FORMAT = "%(asctime)s - %(levelname)s - %(filename)s[:%(lineno)d] - %(message)s"
 DATE_FORMAT = "%m/%d/%Y %H:%M:%S %p"
 logging.basicConfig(format=LOG_FORMAT, datefmt=DATE_FORMAT, level=int(os.environ.get("DEBUG_LEVEL", 20)))
-logging.setLevel(int(os.environ.get("DEBUG_LEVEL", 20)))
 
 
 ENABLE_WORKER = os.environ.get("ENABLE_WORKER", False)
