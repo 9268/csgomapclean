@@ -100,14 +100,18 @@ def parse_jsly(text):
     text = text.replace("mg_blue_&_withe_course", "mg_blue_&amp;_withe_course")
     js = parse(text)['MapList']
     if js != None and 'csgo' in js.keys():
-        if isinstance(js['csgo'], OrderedDict):
-            j = js['csgo']
-            maps.append({'name': j['mapname'],
-                         'size': -1,  'verify': None,  'verifyer': ''})
-        else:
-            for j in js['csgo']:
+        try:
+            if isinstance(js['csgo'], OrderedDict):
+                j = js['csgo']
                 maps.append({'name': j['mapname'],
+                         'size': -1,  'verify': None,  'verifyer': ''})
+            else:
+                for j in js['csgo']:
+                    maps.append({'name': j['mapname'],
                              'size': -1,  'verify': None,  'verifyer': ''})
+        except Exception as e:
+            print(e)
+            print(js)
     return maps
 
 def set_93x():
@@ -153,10 +157,10 @@ def main():
     conf = {}
     t=int(time.time())
     conf["官方地图"] = {"maps":set_default(),"update":t,"icons":"https://cdn.cloudflare.steamstatic.com/steamcommunity/public/images/apps/730/69f7ebe2735c366c65c0b33dae00e12dc40edbe4.jpg"}
-    conf["僵尸乐园"] = {"maps":set_jsly(),"update":t,"icons":"https://bbs.zombieden.cn/favicon.ico"}
     conf["风云社"] =  {"maps":set_fys(),"update":t,"icons":"https://fyscs.com/favicon.ico"}
     conf["UB社区"] = {"maps":set_ub(),"update":t,"icons":"https://csgo.moeub.cn/moeub_logo.svg"}
     conf["93X"] =  {"maps":set_93x(),"update":t,"icons":"https://bbs.upkk.com/favicon.ico"}
+    conf["僵尸乐园"] = {"maps":set_jsly(),"update":t,"icons":"https://bbs.zombieden.cn/favicon.ico"}
     f = open("maps.json", 'w', encoding='utf-8')
     f.write(json.dumps(conf, ensure_ascii=False))
     f.close()
