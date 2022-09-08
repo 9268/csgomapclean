@@ -170,7 +170,7 @@
                 <img width="400" height="140" class="mdui-center"
                     src="https://steamcard.vercel.app/card/76561199062253455/dark,badge,group">
                 <button class="mdui-m-t-2 mdui-btn mdui-btn-raised mdui-btn-block mdui-color-pink-accent mdui-rippl"
-                    mdui-dialog-close>爽了</button>
+                    mdui-dialog-close v-on:click="refreshDictionary">爽了</button>
             </div>
         </div>
         <div class="mdui-bottom-nav mdui-color-white mdui-valign">
@@ -219,9 +219,22 @@
                     this.dialogIns.open()
                     this.dialogIns.handleUpdate()
                 },
-                finalDelete: function () {
+                refreshDictionary: async function () {
+                    this.localMaps = []
+                    for await (const entry of this.directoryHandle.values()) {
+                        if (entry.kind != "directory") {
+                            // console.log(entry)
+                            let file = await entry.getFile()
+                            // console.log(file)
+                            this.localMaps.push(file)
+                        }
+                    }
+                },
+                finalDelete: async function () {
                     console.log("delete")
-                    // TODO:进行文件删除
+                    for (let map of this.mapShow) {
+                        await this.directoryHandle.removeEntry(map.name);
+                    }
                     var tab = new mdui.Dialog("#deleteDoneDialog", { history: false });
                     tab.open()
                 },
@@ -232,15 +245,7 @@
                 selectDict: async function () {
                     this.directoryHandle = await window.showDirectoryPicker();
                     // await directoryHandle.queryPermission()
-                    this.localMaps = []
-                    for await (const entry of this.directoryHandle.values()) {
-                        if (entry.kind != "directory") {
-                            // console.log(entry)
-                            let file = await entry.getFile()
-                            // console.log(file)
-                            this.localMaps.push(file)
-                        }
-                    }
+                    await this.refreshDictionary()
                     this.tabNow = 1
                     this.dialogPercent = 60
                     this.$nextTick(function () {
