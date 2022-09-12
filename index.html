@@ -206,7 +206,7 @@
                 sourceSelected: []
             },
             mounted: function () {
-                this.dialogIns = new mdui.Dialog("#maintab", { modal: false, closeOnEsc: false, history: false });
+                this.dialogIns = new mdui.Dialog("#maintab", { modal: true, closeOnEsc: false, history: false });
                 this.tabIns = new mdui.Tab('#example4-tab');
                 this.dialogIns.open()
                 this.tabIns.handleUpdate();
