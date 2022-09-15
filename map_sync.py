@@ -95,7 +95,7 @@ def set_jsly():
             for prefix in prefixs:
                 for work in words:
                     r = requests.get(jsly[tp]["api"].format(
-                        prefix=prefix, word=work), headers=header)
+                        prefix=prefix, word=work), headers=header,verify=False)
                     maps.extend(parse_jsly(r.text))
                     time.sleep(1)
     if ENABLE_WORKER:
