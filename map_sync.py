@@ -39,43 +39,43 @@ def set_fys():
 
 jsly = {
     "kz": {
-        "api": "https://api.zombieden.cn/zedex_dl.php?map={prefix}{word}",
+        "api": "http://api.zombieden.cn/zedex_dl.php?map={prefix}{word}",
         "prefix": ["kz_"],
         "type": "round",
         "words": "1234567890qwertyuiopasdfghjklzxcvbnm"
     },
     "僵尸感染": {
-        "api": "https://api.zombieden.cn/zedex_dl.php?map={prefix}{word}",
+        "api": "http://api.zombieden.cn/zedex_dl.php?map={prefix}{word}",
         "prefix": ["zm_"],
         "type": "round",
         "words": "1234567890qwertyuiopasdfghjklzxcvbnm"
     },
     "僵尸逃跑": {
-        "api": "https://api.zombieden.cn/zedex_dl.php?map={prefix}{word}",
+        "api": "http://api.zombieden.cn/zedex_dl.php?map={prefix}{word}",
         "prefix": ["ze_"],
         "type": "round",
         "words": "1234567890qwertyuiopasdfghjklzxcvbnm"
     },
     "匪镇谍影": {
-        "api": "https://api.zombieden.cn/zedex_dl.php?map=ttt_",
+        "api": "http://api.zombieden.cn/zedex_dl.php?map=ttt_",
         "type": "once"
     },
     "娱乐对抗": {
-        "api": "https://api.zombieden.cn/zedex_dl.php?map={prefix}{word}",
+        "api": "http://api.zombieden.cn/zedex_dl.php?map={prefix}{word}",
         "prefix": ["mg_"],
         "type": "round",
         "words": "1234567890qwertyuiopasdfghjklzxcvbnm"
     },
     "死跑": {
-        "api": "https://api.zombieden.cn/zedex_dl.php?map=deathrun",
+        "api": "http://api.zombieden.cn/zedex_dl.php?map=deathrun",
         "type": "once"
     },
     "滑翔": {
-        "api": "https://api.zombieden.cn/zedex_dl.php?map=surf",
+        "api": "http://api.zombieden.cn/zedex_dl.php?map=surf",
         "type": "once"
     },
     "连跳": {
-        "api": "https://api.zombieden.cn/zedex_dl.php?map=bhop",
+        "api": "http://api.zombieden.cn/zedex_dl.php?map=bhop",
         "type": "once"
     }
 }
