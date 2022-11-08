@@ -24,17 +24,18 @@ HEADER_ADD = "made_by:mapCleaner_83506876@qq.com"
 
 
 def set_fys():
-    header = {
-        'User-Agent': 'Fys Client v1.6.55.0 '+HEADER_ADD}
-    r = requests.get('https://1mgou.com/client/api/IGetMaps/', headers=header)
-    js = json.loads(r.text)
-    maps = [{'name': j['file'],  'size':j['size'],
-             'verify':j['hash'],  'verifyer':'crc32'} for j in js['array']]
-    if ENABLE_WORKER:
-        workers.put("风云社_maps", json.dumps(
-            {"maps": maps, "time": time.time()}))
-    logging.info("风云社获取完成，共%s张地图" % len(maps))
-    return maps
+    return []
+    # header = {
+    #     'User-Agent': 'Fys Client v1.6.55.0 '+HEADER_ADD}
+    # r = requests.get('https://1mgou.com/client/api/IGetMaps/', headers=header)
+    # js = json.loads(r.text)
+    # maps = [{'name': j['file'],  'size':j['size'],
+    #          'verify':j['hash'],  'verifyer':'crc32'} for j in js['array']]
+    # if ENABLE_WORKER:
+    #     workers.put("风云社_maps", json.dumps(
+    #         {"maps": maps, "time": time.time()}))
+    # logging.info("风云社获取完成，共%s张地图" % len(maps))
+    # return maps
 
 
 jsly = {
@@ -178,7 +179,7 @@ def gen_maps():
     t = int(time.time())
     conf["官方地图"] = {"maps": set_default(
     ), "update": t, "icons": "https://cdn.cloudflare.steamstatic.com/steamcommunity/public/images/apps/730/69f7ebe2735c366c65c0b33dae00e12dc40edbe4.jpg"}
-    conf["风云社"] = {"maps": set_fys(), "update": t,
+    conf["风云社_接口404"] = {"maps": [], "update": t,
                    "icons": "https://fyscs.com/favicon.ico"}
     conf["僵尸乐园"] = {"maps": set_jsly(), "update": t,
                     "icons": "https://bbs.zombieden.cn/favicon.ico"}
