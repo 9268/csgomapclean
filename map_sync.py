@@ -124,28 +124,30 @@ def parse_jsly(text):
 
 
 def set_93x():
-    maps = []
-    urls = [
-        "https://xnetsoft2.93x.net/mapdata/ze.html",
-        "https://xnetsoft2.93x.net/mapdata/kz.html",
-        "https://xnetsoft2.93x.net/mapdata/surf.html",
-        "https://xnetsoft2.93x.net/mapdata/bhop.html",
-        "https://xnetsoft2.93x.net/mapdata/deathrun.html",
-        "https://xnetsoft2.93x.net/mapdata/ttt.html",
-        "https://xnetsoft2.93x.net/mapdata/hns.html",
-        "https://xnetsoft2.93x.net/mapdata/mgdk.html"
-    ]
-    for url in urls:
-        r = requests.get(url, headers={'User-Agent': HEADER_ADD})
-        js = json.loads(r.text)
-        maps.extend([{'name': j['mapname'],  'size':j['size'],
-                    'verify':j['crc_32'],  'verifyer':'crc32'} for j in js])
-    if ENABLE_WORKER:
-        workers.put("93x_maps", json.dumps(
-            {"maps": maps, "time": time.time()}))
-    logging.info("93x获取完成，共%s张地图" % len(maps))
-    return maps
-
+    try:
+        maps = []
+        urls = [
+            "http://xnetsoft2.93x.net/mapdata/ze.html",
+            "http://xnetsoft2.93x.net/mapdata/kz.html",
+            "http://xnetsoft2.93x.net/mapdata/surf.html",
+            "http://xnetsoft2.93x.net/mapdata/bhop.html",
+            "http://xnetsoft2.93x.net/mapdata/deathrun.html",
+            "http://xnetsoft2.93x.net/mapdata/ttt.html",
+            "http://xnetsoft2.93x.net/mapdata/hns.html",
+            "http://xnetsoft2.93x.net/mapdata/mgdk.html"
+        ]
+        for url in urls:
+            r = requests.get(url, headers={'User-Agent': HEADER_ADD})
+            js = json.loads(r.text)
+            maps.extend([{'name': j['mapname'],  'size':j['size'],
+                        'verify':j['crc_32'],  'verifyer':'crc32'} for j in js])
+        if ENABLE_WORKER:
+            workers.put("93x_maps", json.dumps(
+                {"maps": maps, "time": time.time()}))
+        logging.info("93x获取完成，共%s张地图" % len(maps))
+        return maps
+    except:
+        return []
 
 def set_ub():
     header = {'User-Agent': HEADER_ADD}
